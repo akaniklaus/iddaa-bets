@@ -17,8 +17,8 @@ class Match(object):
         self.iy_goals_2 = md[12]
         self.ms_goals_1 = md[8]
         self.ms_goals_2 = md[9]
-        self.h1
-        self.h2
+        self.h1 = md[14]
+        self.h2 = md[15]
         self.was_played
         self.matchID = int(md[10])
         self.ratios = []
@@ -52,11 +52,8 @@ def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
     h_goals_1 = ms_goals_1 + h1
     h_goals_2 = ms_goals_2 + h2  
     res['han'] = (h_goals_1 > h_goals_2, h_goals_1 == h_goals_2, h_goals_1 < h_goals_2)
-
     res['kar'] = (ms_goals_1 > 0 and ms_goals_2 > 0, ms_goals_1 == 0 or ms_goals_2 == 0)
-
     res['cif'] = (ms_goals_1 >= ms_goals_2, ms_goals_1 != ms_goals_2, ms_goals_1 <= ms_goals_2)
-
     res['iy'] = (iy_goals_1 + iy_goals_2 > 1.5, iy_goals_1 + iy_goals_2 < 1.5)
 
     total = ms_goals_1 + ms_goals_2    
@@ -68,41 +65,41 @@ def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
     return res
 
 
-def get_period_id():
+def get_today_id():
     """
         returns the id for today's period
     """
-    dates_data = get_json_data(URL_DATES)
-    return int(dates_data['w'][0][0])
+    response = urllib2.urlopen(URL_DATES)
+    content = response.read()
+    return int(content[6:11])
 
 
-if __name__ == '__main__':
-    period_id = get_period_id()
-    matches_json = get_json_data(URL_MATCHES % period_id)
-    j = matches_json
-    import ipdb; ipdb.set_trace()
-    matches = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
+# today_id = get_today_id()
+
+# j = get_json_data(URL_MATCHES % today_id)
+# matches_today = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
+
+# j = get_json_data(URL_MATCHES % (today_id - 1))
+# matches_yesterday = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
     # TODO:
-
-    # scrape handicaps
     # database storage
 
 
 
 
-    conn = MySQLdb.connect(host="localhost",
-                            user="sportbets",
-                            passwd="sportbets",
-                            db="sportbets_db")
-    x = conn.cursor()
+    # conn = MySQLdb.connect(host="localhost",
+    #                         user="sportbets",
+    #                         passwd="sportbets",
+    #                         db="sportbets_db")
+    # x = conn.cursor()
 
-    try:
-       x.execute(
-       "INSERT INTO CBE_meterology (Station, DateAP)" 
-       "VALUES (%s,%s)",(data['current_observation']['observation_location']['city'],data['current_observation']['observation_time_rfc822']))
-       conn.commit()
-    except:
-       conn.rollback()
+    # try:
+    #    x.execute(
+    #    "INSERT INTO CBE_meterology (Station, DateAP)" 
+    #    "VALUES (%s,%s)",(data['current_observation']['observation_location']['city'],data['current_observation']['observation_time_rfc822']))
+    #    conn.commit()
+    # except:
+    #    conn.rollback()
 
-    conn.close()
+    # conn.close()
