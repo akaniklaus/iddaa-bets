@@ -63,7 +63,6 @@ def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
     res['au1'] = (total > 1.5, total < 1.5)
     res['au2'] = (total > 2.5, total < 2.5)
     res['au3'] = (total > 3.5, total < 3.5)
-
     res['top'] = (total < 2, total >= 2 and total < 4, total >= 4 and total < 7, total >= 7)
 
     return res
