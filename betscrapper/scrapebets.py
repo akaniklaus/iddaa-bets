@@ -44,20 +44,26 @@ def get_json_data(url):
     return result
 
 
-def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2):
+def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
     res = {}
     res['mac'] = (ms_goals_1 > ms_goals_2, ms_goals_1 == ms_goals_2, ms_goals_1 < ms_goals_2)
     res['ilk'] = (iy_goals_1 > iy_goals_2, iy_goals_1 == iy_goals_2, iy_goals_1 < iy_goals_2)
-    res['han'] = ()
+
+    h_goals_1 = ms_goals_1 + h1
+    h_goals_2 = ms_goals_2 + h2  
+    res['han'] = (h_goals_1 > h_goals_2, h_goals_1 == h_goals_2, h_goals_1 < h_goals_2)
+
     res['kar'] = (ms_goals_1 > 0 and ms_goals_2 > 0, ms_goals_1 == 0 or ms_goals_2 == 0)
 
     res['cif'] = (ms_goals_1 >= ms_goals_2, ms_goals_1 != ms_goals_2, ms_goals_1 <= ms_goals_2)
-    res['iy'] = ()
-    res['au1'] = ()
-    res['au2'] = ()
-    res['au3'] = ()
 
-    total = ms_goals_1 + ms_goals_2
+    res['iy'] = (iy_goals_1 + iy_goals_2 > 1.5, iy_goals_1 + iy_goals_2 < 1.5)
+
+    total = ms_goals_1 + ms_goals_2    
+    res['au1'] = (total > 1.5, total < 1.5)
+    res['au2'] = (total > 2.5, total < 2.5)
+    res['au3'] = (total > 3.5, total < 3.5)
+
     res['top'] = (total < 2, total >= 2 and total < 4, total >= 4 and total < 7, total >= 7)
 
     return res
@@ -78,12 +84,18 @@ if __name__ == '__main__':
     import ipdb; ipdb.set_trace()
     matches = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
-    
+    # TODO:
+
+    # scrape handicaps
+    # database storage
+
+
+
 
     conn = MySQLdb.connect(host="localhost",
                             user="sportbets",
-                      passwd="sportbets",
-                      db="sportbets_db")
+                            passwd="sportbets",
+                            db="sportbets_db")
     x = conn.cursor()
 
     try:
