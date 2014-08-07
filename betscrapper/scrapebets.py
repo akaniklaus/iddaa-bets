@@ -1,6 +1,7 @@
-import demjson
+import simplejson
 import urllib2
-import MySQLdb
+import re
+#import MySQLdb
 
 URL_DATES = """http://www.mackolik.com/AjaxHandlers/ProgramComboHandler.ashx?sport=1&type=6&sortValue=DATE&day=-1&sortDir=1&groupId=-1&np=0"""
 URL_MATCHES = """http://www.mackolik.com/AjaxHandlers/ProgramDataHandler.ashx?type=6&sortValue=DATE&week=%d&day=-1&sort=-1&sortDir=1&groupId=-1&np=0&sport=1"""
@@ -39,8 +40,11 @@ class Match(object):
 
 def get_json_data(url):
     response = urllib2.urlopen(url)
-    content = response.read()
-    result = demjson.decode(content)
+    j = response.read()
+    j = re.sub(r"{\s*(\w+):", r'{"\1":', j)
+    j = re.sub(r",\s*(\w+):", r',"\1":', j)
+    j = j.replace("'", '"')
+    result = simplejson.loads(j)
     return result
 
 
@@ -50,13 +54,13 @@ def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
     res['ilk'] = (iy_goals_1 > iy_goals_2, iy_goals_1 == iy_goals_2, iy_goals_1 < iy_goals_2)
 
     h_goals_1 = ms_goals_1 + h1
-    h_goals_2 = ms_goals_2 + h2  
+    h_goals_2 = ms_goals_2 + h2
     res['han'] = (h_goals_1 > h_goals_2, h_goals_1 == h_goals_2, h_goals_1 < h_goals_2)
     res['kar'] = (ms_goals_1 > 0 and ms_goals_2 > 0, ms_goals_1 == 0 or ms_goals_2 == 0)
     res['cif'] = (ms_goals_1 >= ms_goals_2, ms_goals_1 != ms_goals_2, ms_goals_1 <= ms_goals_2)
     res['iy'] = (iy_goals_1 + iy_goals_2 > 1.5, iy_goals_1 + iy_goals_2 < 1.5)
 
-    total = ms_goals_1 + ms_goals_2    
+    total = ms_goals_1 + ms_goals_2
     res['au1'] = (total > 1.5, total < 1.5)
     res['au2'] = (total > 2.5, total < 2.5)
     res['au3'] = (total > 3.5, total < 3.5)
@@ -74,13 +78,13 @@ def get_today_id():
     return int(content[6:11])
 
 
-# today_id = get_today_id()
+today_id = get_today_id()
 
-# j = get_json_data(URL_MATCHES % today_id)
-# matches_today = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
+#j = get_json_data(URL_MATCHES % today_id)
+#matches_today = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
-# j = get_json_data(URL_MATCHES % (today_id - 1))
-# matches_yesterday = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
+j = get_json_data(URL_MATCHES % (today_id - 1))
+matches_yesterday = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
     # TODO:
     # database storage
@@ -96,7 +100,7 @@ def get_today_id():
 
     # try:
     #    x.execute(
-    #    "INSERT INTO CBE_meterology (Station, DateAP)" 
+    #    "INSERT INTO CBE_meterology (Station, DateAP)"
     #    "VALUES (%s,%s)",(data['current_observation']['observation_location']['city'],data['current_observation']['observation_time_rfc822']))
     #    conn.commit()
     # except:
