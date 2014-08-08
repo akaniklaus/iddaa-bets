@@ -1,35 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import simplejson
-import urllib2
-import re
 from db_conn import DB_CONN
 from matches import Match
-from utils import concat
+from utils import concat, get_json_data, get_today_id
 
 
-URL_DATES = """http://www.mackolik.com/AjaxHandlers/ProgramComboHandler.ashx?sport=1&type=6&sortValue=DATE&day=-1&sortDir=1&groupId=-1&np=0"""
 URL_MATCHES = """http://www.mackolik.com/AjaxHandlers/ProgramDataHandler.ashx?type=6&sortValue=DATE&week=%d&day=-1&sort=-1&sortDir=1&groupId=-1&np=0&sport=1"""
-
-
-def get_json_data(url):
-    response = urllib2.urlopen(url)
-    j = response.read()
-    j = re.sub(r"{\s*(\w+):", r'{"\1":', j)
-    j = re.sub(r",\s*(\w+):", r',"\1":', j)
-    j = j.replace("'", '"')
-    result = simplejson.loads(j)
-    return result
-
-
-def get_today_id():
-    """
-        returns the id for today's period
-    """
-    response = urllib2.urlopen(URL_DATES)
-    content = response.read()
-    return int(content[6:11])
 
 
 def update_winner_coupons():
