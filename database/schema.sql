@@ -1,8 +1,14 @@
 CREATE DATABASE sportbets_db;
 GRANT ALL PRIVILEGES ON sportbets_db.* TO 'sportbets'@'localhost';
 
+DROP TABLE tbl_Ratios;
+DROP TABLE tbl_MatchInfo;
+DROP TABLE tbl_Results;
+DROP TABLE tbl_Coupons;
+DROP TABLE tbl_UserCoupon;
+
 CREATE TABLE tbl_Ratios(
-    `date` date NOT NULL,
+    `weekID` int(11) NOT NULL,
     `matchID` int(11) NOT NULL,
 	`r1` double DEFAULT NULL,
 	`r2` double DEFAULT NULL,
@@ -30,53 +36,32 @@ CREATE TABLE tbl_Ratios(
 	`r24` double DEFAULT NULL,
 	`r25` double DEFAULT NULL,
 	`r26` double DEFAULT NULL,
-	`r27` double DEFAULT NULL,
-	`r28` double DEFAULT NULL,
-	`r29` double DEFAULT NULL,
-	`r30` double DEFAULT NULL,
-	`r31` double DEFAULT NULL,
-	`r32` double DEFAULT NULL,
-	`r33` double DEFAULT NULL,
-	`r34` double DEFAULT NULL,
-	`r35` double DEFAULT NULL,
-	`r36` double DEFAULT NULL,
-	`r37` double DEFAULT NULL,
-	`r38` double DEFAULT NULL,
-	`r39` double DEFAULT NULL,
-	`r40` double DEFAULT NULL,
-	`r41` double DEFAULT NULL,
-	`r42` double DEFAULT NULL,
-	`r43` double DEFAULT NULL,
-	`r44` double DEFAULT NULL,
-	`r45` double DEFAULT NULL,
-	`r46` double DEFAULT NULL,
-	`r47` double DEFAULT NULL,
-	`r48` double DEFAULT NULL,
-	`r49` double DEFAULT NULL,
-	`r50` double DEFAULT NULL,
-	PRIMARY KEY (`date`,`matchID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+	PRIMARY KEY (`weekID`,`matchID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 CREATE TABLE tbl_MatchInfo(
-    `date` date NOT NULL,
-    `time` datetime NOT NULL,
+    `weekID` int(11) NOT NULL,
     `matchID` int(11) NOT NULL,
+    `datetime` datetime NOT NULL,
     `league` varchar(5) NOT NULL,
     `team_1` varchar(40) CHARACTER SET utf8 NOT NULL,
     `team_2` varchar(40) CHARACTER SET utf8 NOT NULL,
-    `mbs` tinyint NOT NULL,
-    `iy_goals_1` tinyint NOT NULL,
-    `iy_goals_2` tinyint NOT NULL,
-    `ms_goals_1` tinyint NOT NULL,
-    `ms_goals_2` tinyint NOT NULL,
+    `mbs` tinyint DEFAULT NULL,
+    `iy_goals_1` tinyint DEFAULT NULL,
+    `iy_goals_2` tinyint DEFAULT NULL,
+    `ms_goals_1` tinyint DEFAULT NULL,
+    `ms_goals_2` tinyint DEFAULT NULL,
     `h1` tinyint NOT NULL,
     `h2` tinyint NOT NULL,
     `was_played` boolean NOT NULL DEFAULT 0,
-	PRIMARY KEY (`date`,`matchID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  	PRIMARY KEY (`weekID`,`matchID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 
 CREATE TABLE tbl_Results(
-    `date` date NOT NULL,
+    `weekID` int(11) NOT NULL,
     `matchID` int(11) NOT NULL,
 	`r1` boolean NOT NULL DEFAULT 0,
 	`r2` boolean NOT NULL DEFAULT 0,
@@ -104,32 +89,8 @@ CREATE TABLE tbl_Results(
 	`r24` boolean NOT NULL DEFAULT 0,
 	`r25` boolean NOT NULL DEFAULT 0,
 	`r26` boolean NOT NULL DEFAULT 0,
-	`r27` boolean NOT NULL DEFAULT 0,
-	`r28` boolean NOT NULL DEFAULT 0,
-	`r29` boolean NOT NULL DEFAULT 0,
-	`r30` boolean NOT NULL DEFAULT 0,
-	`r31` boolean NOT NULL DEFAULT 0,
-	`r32` boolean NOT NULL DEFAULT 0,
-	`r33` boolean NOT NULL DEFAULT 0,
-	`r34` boolean NOT NULL DEFAULT 0,
-	`r35` boolean NOT NULL DEFAULT 0,
-	`r36` boolean NOT NULL DEFAULT 0,
-	`r37` boolean NOT NULL DEFAULT 0,
-	`r38` boolean NOT NULL DEFAULT 0,
-	`r39` boolean NOT NULL DEFAULT 0,
-	`r40` boolean NOT NULL DEFAULT 0,
-	`r41` boolean NOT NULL DEFAULT 0,
-	`r42` boolean NOT NULL DEFAULT 0,
-	`r43` boolean NOT NULL DEFAULT 0,
-	`r44` boolean NOT NULL DEFAULT 0,
-	`r45` boolean NOT NULL DEFAULT 0,
-	`r46` boolean NOT NULL DEFAULT 0,
-	`r47` boolean NOT NULL DEFAULT 0,
-	`r48` boolean NOT NULL DEFAULT 0,
-	`r49` boolean NOT NULL DEFAULT 0,
-	`r50` boolean NOT NULL DEFAULT 0,
-	PRIMARY KEY (`date`,`matchID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+	PRIMARY KEY (`weekID`,`matchID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE tbl_Coupons(
@@ -162,30 +123,6 @@ CREATE TABLE tbl_Coupons(
 	`r24` boolean NOT NULL DEFAULT 0,
 	`r25` boolean NOT NULL DEFAULT 0,
 	`r26` boolean NOT NULL DEFAULT 0,
-	`r27` boolean NOT NULL DEFAULT 0,
-	`r28` boolean NOT NULL DEFAULT 0,
-	`r29` boolean NOT NULL DEFAULT 0,
-	`r30` boolean NOT NULL DEFAULT 0,
-	`r31` boolean NOT NULL DEFAULT 0,
-	`r32` boolean NOT NULL DEFAULT 0,
-	`r33` boolean NOT NULL DEFAULT 0,
-	`r34` boolean NOT NULL DEFAULT 0,
-	`r35` boolean NOT NULL DEFAULT 0,
-	`r36` boolean NOT NULL DEFAULT 0,
-	`r37` boolean NOT NULL DEFAULT 0,
-	`r38` boolean NOT NULL DEFAULT 0,
-	`r39` boolean NOT NULL DEFAULT 0,
-	`r40` boolean NOT NULL DEFAULT 0,
-	`r41` boolean NOT NULL DEFAULT 0,
-	`r42` boolean NOT NULL DEFAULT 0,
-	`r43` boolean NOT NULL DEFAULT 0,
-	`r44` boolean NOT NULL DEFAULT 0,
-	`r45` boolean NOT NULL DEFAULT 0,
-	`r46` boolean NOT NULL DEFAULT 0,
-	`r47` boolean NOT NULL DEFAULT 0,
-	`r48` boolean NOT NULL DEFAULT 0,
-	`r49` boolean NOT NULL DEFAULT 0,
-	`r50` boolean NOT NULL DEFAULT 0,
 	`won` boolean NOT NULL DEFAULT 0,
 	PRIMARY KEY (`couponID`, `date`,`matchID`)
 );
