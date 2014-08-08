@@ -1,44 +1,27 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import simplejson
-import urllib2
-import re
-import MySQLdb
-from itertools import chain
 from datetime import date, datetime
-
-
-URL_DATES = """http://www.mackolik.com/AjaxHandlers/ProgramComboHandler.ashx?sport=1&type=6&sortValue=DATE&day=-1&sortDir=1&groupId=-1&np=0"""
-URL_MATCHES = """http://www.mackolik.com/AjaxHandlers/ProgramDataHandler.ashx?type=6&sortValue=DATE&week=%d&day=-1&sort=-1&sortDir=1&groupId=-1&np=0&sport=1"""
-
-DB_CONN = MySQLdb.connect(host="localhost",
-                        user="sportbets",
-                        passwd="sportbets",
-                        db="sportbets_db",
-                        use_unicode=True, charset="utf8")
+from db_conn import DB_CONN
+from utils import parse_int, parse_float, concat
 
 BET_ORDER = ['mac', 'ilk', 'han', 'kar', 'cif', 'iy', 'au1', 'au2', 'au3', 'top']
 
+def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
+    res = {}
+    res['mac'] = (ms_goals_1 > ms_goals_2, ms_goals_1 == ms_goals_2, ms_goals_1 < ms_goals_2)
+    res['ilk'] = (iy_goals_1 > iy_goals_2, iy_goals_1 == iy_goals_2, iy_goals_1 < iy_goals_2)
 
-def concat(ls):
-    return [i for i in chain.from_iterable(ls)]
+    h_goals_1 = ms_goals_1 + h1
+    h_goals_2 = ms_goals_2 + h2
+    res['han'] = (h_goals_1 > h_goals_2, h_goals_1 == h_goals_2, h_goals_1 < h_goals_2)
+    res['kar'] = (ms_goals_1 > 0 and ms_goals_2 > 0, ms_goals_1 == 0 or ms_goals_2 == 0)
+    res['cif'] = (ms_goals_1 >= ms_goals_2, ms_goals_1 != ms_goals_2, ms_goals_1 <= ms_goals_2)
+    res['iy'] = (iy_goals_1 + iy_goals_2 > 1.5, iy_goals_1 + iy_goals_2 < 1.5)
 
+    total = ms_goals_1 + ms_goals_2
+    res['au1'] = (total > 1.5, total < 1.5)
+    res['au2'] = (total > 2.5, total < 2.5)
+    res['au3'] = (total > 3.5, total < 3.5)
+    res['top'] = (total < 2, total >= 2 and total < 4, total >= 4 and total < 7, total >= 7)
 
-def parse_int(s):
-    try:
-        res = int(s)
-    except Exception:
-        res = None
-    return res
-
-
-def parse_float(s):
-    try:
-        res = float(s)
-        assert(res)
-    except Exception:
-        res = None
     return res
 
 
@@ -147,7 +130,7 @@ class Match(object):
 
 
     def save_results(self):
-        querystart = """REPLACE INTO tbl_Results (weekID, matchID, """
+        querystart = """INSERT INTO tbl_Results (weekID, matchID, """
         queryvalues = """VALUES ("%s", "%d", """ %\
                         (self.weekID, self.matchID)
         rnames = ""
@@ -163,68 +146,45 @@ class Match(object):
         queryvalues = queryvalues[:-2] + ")"
 
         query = querystart + queryvalues
-        DB_CONN.cursor().execute(query)
-        DB_CONN.commit()
-
-        pass
-
-
-def get_json_data(url):
-    response = urllib2.urlopen(url)
-    j = response.read()
-    j = re.sub(r"{\s*(\w+):", r'{"\1":', j)
-    j = re.sub(r",\s*(\w+):", r',"\1":', j)
-    j = j.replace("'", '"')
-    result = simplejson.loads(j)
-    return result
+        
+        try:
+            DB_CONN.cursor().execute(query)
+            DB_CONN.commit()
+            # if INSERT succeeds
+            # check all related coupons
+        except Exception, e:
+            return
+        print "I will update coupons!!"
+        self.update_coupons()
 
 
-def get_results(iy_goals_1, iy_goals_2, ms_goals_1, ms_goals_2, h1=0, h2=0):
-    res = {}
-    res['mac'] = (ms_goals_1 > ms_goals_2, ms_goals_1 == ms_goals_2, ms_goals_1 < ms_goals_2)
-    res['ilk'] = (iy_goals_1 > iy_goals_2, iy_goals_1 == iy_goals_2, iy_goals_1 < iy_goals_2)
+    def update_coupons(self):
+        """
+            it checks all coupons related to this match
+            to see if they won
+        """
+        query = """SELECT bet_index, couponID from tbl_Coupons """ +\
+                """WHERE weekID=%d AND matchID=%d AND won IS NULL""" % (self.weekID, self.matchID)
+        x = DB_CONN.cursor()
+        x.execute(query)
+        coupon_rows = x.fetchall()
+        
+        loser_coupons = []
+        for row in coupon_rows:
+            bet_index = row[0]
+            couponID = row[1]
+            won = self.results[bet_index]
+            
+            query = """UPDATE tbl_Coupons SET won=%d WHERE couponID=%d AND weekID=%d AND matchID=%d""" % \
+                        (won, couponID, self.weekID, self.matchID)
+            x.execute(query)
+            DB_CONN.commit()
+            if not won:
+                loser_coupons.append(couponID)
 
-    h_goals_1 = ms_goals_1 + h1
-    h_goals_2 = ms_goals_2 + h2
-    res['han'] = (h_goals_1 > h_goals_2, h_goals_1 == h_goals_2, h_goals_1 < h_goals_2)
-    res['kar'] = (ms_goals_1 > 0 and ms_goals_2 > 0, ms_goals_1 == 0 or ms_goals_2 == 0)
-    res['cif'] = (ms_goals_1 >= ms_goals_2, ms_goals_1 != ms_goals_2, ms_goals_1 <= ms_goals_2)
-    res['iy'] = (iy_goals_1 + iy_goals_2 > 1.5, iy_goals_1 + iy_goals_2 < 1.5)
+        for couponID in loser_coupons:
+                
+            query = """UPDATE tbl_UserCoupon SET won=false WHERE couponID=%d""" % couponID
+            x.execute(query)
+            DB_CONN.commit()
 
-    total = ms_goals_1 + ms_goals_2
-    res['au1'] = (total > 1.5, total < 1.5)
-    res['au2'] = (total > 2.5, total < 2.5)
-    res['au3'] = (total > 3.5, total < 3.5)
-    res['top'] = (total < 2, total >= 2 and total < 4, total >= 4 and total < 7, total >= 7)
-
-    return res
-
-
-def get_today_id():
-    """
-        returns the id for today's period
-    """
-    response = urllib2.urlopen(URL_DATES)
-    content = response.read()
-    return int(content[6:11])
-
-
-today_id = get_today_id()
-
-j = get_json_data(URL_MATCHES % today_id)
-matches_last = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
-
-j = get_json_data(URL_MATCHES % (today_id - 1))
-matches_previous = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
-
-all_matches = concat(matches_previous.values() + matches_last.values())
-
-for md in concat(matches_previous.values()):
-    match = Match(md, weekid=today_id - 1)
-    match.save_all()
-
-for md in concat(matches_last.values()):
-    match = Match(md, weekid=today_id)
-    match.save_all()
-
-DB_CONN.close()

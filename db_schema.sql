@@ -93,48 +93,41 @@ CREATE TABLE tbl_Results(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE tbl_Coupons(
-    `couponID` int(11) NOT NULL,
-    `date` date NOT NULL,
-    `matchID` int(11) NOT NULL,
-	`r1` boolean NOT NULL DEFAULT 0,
-	`r2` boolean NOT NULL DEFAULT 0,
-	`r3` boolean NOT NULL DEFAULT 0,
-	`r4` boolean NOT NULL DEFAULT 0,
-	`r5` boolean NOT NULL DEFAULT 0,
-	`r6` boolean NOT NULL DEFAULT 0,
-	`r7` boolean NOT NULL DEFAULT 0,
-	`r8` boolean NOT NULL DEFAULT 0,
-	`r9` boolean NOT NULL DEFAULT 0,
-	`r10` boolean NOT NULL DEFAULT 0,
-	`r11` boolean NOT NULL DEFAULT 0,
-	`r12` boolean NOT NULL DEFAULT 0,
-	`r13` boolean NOT NULL DEFAULT 0,
-	`r14` boolean NOT NULL DEFAULT 0,
-	`r15` boolean NOT NULL DEFAULT 0,
-	`r16` boolean NOT NULL DEFAULT 0,
-	`r17` boolean NOT NULL DEFAULT 0,
-	`r18` boolean NOT NULL DEFAULT 0,
-	`r19` boolean NOT NULL DEFAULT 0,
-	`r20` boolean NOT NULL DEFAULT 0,
-	`r21` boolean NOT NULL DEFAULT 0,
-	`r22` boolean NOT NULL DEFAULT 0,
-	`r23` boolean NOT NULL DEFAULT 0,
-	`r24` boolean NOT NULL DEFAULT 0,
-	`r25` boolean NOT NULL DEFAULT 0,
-	`r26` boolean NOT NULL DEFAULT 0,
-	`won` boolean NOT NULL DEFAULT 0,
-	PRIMARY KEY (`couponID`, `date`,`matchID`)
-);
-
-
 CREATE TABLE tbl_UserCoupon(
     `userID` int(11) NOT NULL,
-    `couponID` int(11) NOT NULL,
-    `start_date` date NOT NULL,
-    `end_date` date NOT NULL,
-	`won` boolean NOT NULL DEFAULT 0,
+    `couponID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `start_date` datetime DEFAULT NULL,
+    `end_date` datetime DEFAULT NULL,
+	`won` boolean DEFAULT NULL,
 	`ratio` double DEFAULT NULL,
 	PRIMARY KEY (`couponID`, `userID`)
 );
+
+
+CREATE TABLE tbl_Coupons(
+    `couponID` int(11) NOT NULL,
+    `weekID` int(11) NOT NULL,
+    `matchID` int(11) NOT NULL,
+    `bet_index` int(11) NOT NULL,
+	`won` boolean DEFAULT NULL,
+	PRIMARY KEY (`couponID`, `weekID`,`matchID`)
+);
+
+delimiter //
+CREATE TRIGGER updateUserCoupon BEFORE INSERT ON tbl_Coupons 
+    FOR EACH ROW 
+BEGIN
+-- update start date and end date
+    DECLARE sd datetime;
+    DECLARE ed datetime;
+	SELECT MIN(m.datetime), MAX(m.datetime)
+	INTO sd, ed
+	FROM tbl_MatchInfo m, tbl_Coupons c
+	WHERE c.couponID=NEW.couponID AND m.weekID=c.weekID AND m.matchID=c.matchID;
+
+	UPDATE tbl_UserCoupon
+	SET start_date=sd, end_date=ed
+	WHERE couponID=NEW.couponID;
+END;//
+delimiter ;
 
