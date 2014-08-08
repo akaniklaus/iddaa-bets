@@ -210,7 +210,7 @@ class Match(object):
             # check all related coupons
         except Exception, e:
             return
-        print "I will update coupons!!"
+
         self.update_coupons()
 
 
