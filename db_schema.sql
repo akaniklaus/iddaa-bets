@@ -1,11 +1,12 @@
+-- login as root to mysql and run
 CREATE DATABASE sportbets_db;
+CREATE USER 'sportbets'@'localhost' IDENTIFIED BY 'sportbets';
 GRANT ALL PRIVILEGES ON sportbets_db.* TO 'sportbets'@'localhost';
 
-DROP TABLE tbl_Ratios;
-DROP TABLE tbl_MatchInfo;
-DROP TABLE tbl_Results;
-DROP TABLE tbl_Coupons;
-DROP TABLE tbl_UserCoupon;
+-- Then login with the new user and run the following
+-- mysql -u sportbets -psportbets sportbets_db
+
+
 
 CREATE TABLE tbl_Ratios(
     `weekID` int(11) NOT NULL,
@@ -102,7 +103,6 @@ CREATE TABLE tbl_MatchInfo(
     `was_played` boolean NOT NULL DEFAULT 0,
   	PRIMARY KEY (`weekID`,`matchID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 
 CREATE TABLE tbl_Results(
