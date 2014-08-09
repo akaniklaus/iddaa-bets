@@ -53,11 +53,11 @@ def update_user_coupon_ratios():
 today_id = get_today_id()
 
 x = DB_CONN.cursor()
-query = """DELETE * FROM tbl_MatchInfo WHERE weekID!=%d AND weekID!=%d""" % (today_id, (today_id -1))
+query = """DELETE * FROM tbl_MatchInfo WHERE weekID<>%d AND weekID<>%d""" % (today_id, (today_id -1))
 x.execute(query)
-query = """DELETE * FROM tbl_Results WHERE weekID!=%d AND weekID!=%d""" % (today_id, (today_id -1))
+query = """DELETE * FROM tbl_Results WHERE weekID<>%d AND weekID<>%d""" % (today_id, (today_id -1))
 x.execute(query)
-query = """DELETE * FROM tbl_Ratios WHERE weekID!=%d AND weekID!=%d""" % (today_id, (today_id -1))
+query = """DELETE * FROM tbl_Ratios WHERE weekID<>%d AND weekID<>%d""" % (today_id, (today_id -1))
 x.execute(query)
 DB_CONN.commit()
 
