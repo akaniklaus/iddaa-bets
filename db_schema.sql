@@ -190,6 +190,8 @@ CREATE TABLE tbl_UserCoupon(
     `end_date` datetime DEFAULT NULL,
 	`won` boolean DEFAULT NULL,
 	`ratio` double DEFAULT NULL,
+  `couponPrice` double NOT NULL,
+  `noCustomers` int(11) NOT NULL,
 	PRIMARY KEY (`couponID`, `user_ID`)
 );
 
