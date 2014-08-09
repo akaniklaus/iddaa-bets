@@ -6,8 +6,6 @@ GRANT ALL PRIVILEGES ON sportbets_db.* TO 'sportbets'@'localhost';
 -- Then login with the new user and run the following
 -- mysql -u sportbets -psportbets sportbets_db
 
-
-
 CREATE TABLE tbl_Ratios(
     `weekID` int(11) NOT NULL,
     `matchID` int(11) NOT NULL,
@@ -182,7 +180,7 @@ CREATE TABLE tbl_Results(
 	PRIMARY KEY (`weekID`,`matchID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
+DROP TABLE IF EXISTS tbl_UserCoupon;
 CREATE TABLE tbl_UserCoupon(
     `user_ID` int(11) NOT NULL,
     `couponID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -192,19 +190,31 @@ CREATE TABLE tbl_UserCoupon(
 	`ratio` double DEFAULT NULL,
   `couponPrice` double NOT NULL,
   `noCustomers` int(11) NOT NULL,
+  `noPlayed` int(11) NOT NULL,
+  `isReleased` boolean DEFAULT NULL,
 	PRIMARY KEY (`couponID`, `user_ID`)
 );
 
+DROP TABLE IF EXISTS tbl_UserStats;
 CREATE TABLE tbl_UserStats(
     `user_ID` int(11) NOT NULL,
+
+DROP TABLE IF EXISTS tbl_Users;
+CREATE TABLE `tbl_Users` (
+  `user_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `facebookID` varchar(64) DEFAULT NULL,
+  `userName` varchar(64) DEFAULT NULL,
   `winRatio` double DEFAULT 0.5,
   `matchRatio` double DEFAULT 0.5,
   `winMulti` double DEFAULT 1,
   `matchMulti` double DEFAULT 1,
+  `moneyWonRatio` double DEFAULT 0.5,
+  `userCRating` double DEFAULT 1,
+  `userSRating` double DEFAULT 1,
   PRIMARY KEY (`user_ID`)
-);
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
-
+DROP TABLE IF EXISTS tbl_Coupons;
 CREATE TABLE tbl_Coupons(
     `couponID` int(11) NOT NULL,
     `weekID` int(11) NOT NULL,
@@ -214,6 +224,7 @@ CREATE TABLE tbl_Coupons(
 	PRIMARY KEY (`couponID`, `weekID`,`matchID`)
 );
 
+DROP TRIGGER IF EXISTS updateUserCoupon;
 delimiter //
 CREATE TRIGGER updateUserCoupon BEFORE INSERT ON tbl_Coupons
     FOR EACH ROW
@@ -232,8 +243,22 @@ BEGIN
 END;//
 delimiter ;
 
+DROP TRIGGER IF EXISTS beforeStatistics;
 delimiter //
-CREATE TRIGGER updateStatistics AFTER UPDATE ON tbl_UserCoupon
+CREATE TRIGGER beforeStatistics BEFORE UPDATE ON tbl_UserCoupon
+    FOR EACH ROW
+BEGIN
+
+IF NEW.noPlayed >= NEW.noCustomers THEN
+  SET NEW.isReleased = TRUE;
+END IF;
+
+END;//
+delimiter ;
+
+DROP TRIGGER IF EXISTS afterStatistics;
+delimiter //
+CREATE TRIGGER afterStatistics AFTER UPDATE ON tbl_UserCoupon
     FOR EACH ROW
 BEGIN
 -- update start date and end date
@@ -241,14 +266,23 @@ BEGIN
   DECLARE wm double;
   DECLARE mr double;
   DECLARE mm double;
+  DECLARE wrc double;
+  DECLARE ucr double;
+  DECLARE usr double;
 
-  SELECT SUM(a.won)/COUNT(a.won), SUM(a.won*a.ratio), SUM(b.won)/COUNT(b.won), SUM(b.won*b.ratio)
-  INTO wr, wm, mr, mm
+  SELECT SUM(a.won)/COUNT(a.won)+1, AVG(a.won*a.ratio), SUM(b.won)/COUNT(b.won)+1, AVG(b.won*b.ratio),
+  SUM(a.won*a.noPlayed*a.couponPrice)/SUM(a.noPlayed*a.couponPrice)+1,
+  AVG(a.won*a.noPlayed*a.couponPrice*a.ratio)/SUM(a.noPlayed*a.couponPrice)+1,
+  AVG(a.isReleased * a.couponPrice * a.noPlayed)
+  INTO wr, wm, mr, mm, wrc, ucr, usr
   FROM tbl_UserCoupon a, tbl_Coupons b
   WHERE user_ID=NEW.user_ID AND a.CouponID=b.CouponID;
 
-  UPDATE tbl_UserStats
-  SET winRatio=wr, matchRatio=wm, winMulti=mr, matchMulti=mm
+  UPDATE tbl_Users
+  SET winRatio=wr, matchRatio=wm, winMulti=mr, matchMulti=mm,
+  moneyWonRatio=wrc, userCRating=ucr, userSRating=usr
   WHERE user_ID=NEW.user_ID;
+
+
 END;//
 delimiter ;
