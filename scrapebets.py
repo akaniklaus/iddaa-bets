@@ -19,7 +19,7 @@ def update_winner_coupons():
         query = """SELECT * from tbl_Coupons WHERE won IS NULL AND couponID=%d""" % couponID
         x.execute(query)
         results = x.fetchall()
-        
+
         if len(results) == 0:
             query = """UPDATE tbl_UserCoupon SET won=true WHERE couponID=%d""" % couponID
             x.execute(query)
@@ -44,20 +44,26 @@ def update_user_coupon_ratios():
             x.execute(query)
             ratio *= x.fetchone()[0]
 
-        
+
         query = """UPDATE tbl_UserCoupon SET ratio=%f WHERE couponID=%d""" %\
                 (ratio, couponID)
         x.execute(query)
         DB_CONN.commit()
-
 
 today_id = get_today_id()
 
 j = get_json_data(URL_MATCHES % today_id)
 matches_last = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
-j = get_json_data(URL_MATCHES % (today_id - 1))
-matches_previous = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
+x = DB_CONN.cursor()
+query = """SELECT * FROM tbl_MatchInfo WHERE weekID=(today_id -1) AND was_played=False"""
+results = x.execute(query)
+
+matches_previous = {}
+
+if results:
+  j = get_json_data(URL_MATCHES % (today_id - 1))
+  matches_previous = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
 all_matches = concat(matches_previous.values() + matches_last.values())
 
