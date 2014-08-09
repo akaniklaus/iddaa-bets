@@ -192,6 +192,8 @@ CREATE TABLE tbl_UserCoupon(
   `noCustomers` int(11) NOT NULL,
   `noPlayed` int(11) NOT NULL,
   `isReleased` boolean DEFAULT NULL,
+  `couponCRating` double DEFAULT 0,
+  `couponSRating` double DEFAULT 0,
 	PRIMARY KEY (`couponID`, `user_ID`)
 );
 
@@ -278,6 +280,10 @@ BEGIN
   SET winRatio=wr, matchRatio=wm, winMulti=mr, matchMulti=mm,
   moneyWonRatio=wrc, userCRating=ucr, userSRating=usr
   WHERE user_ID=NEW.user_ID;
+
+  UPDATE tbl_UserCoupon
+  SET couponCRating=(ucr/NEW.couponPrice), couponSRating=(usr*NEW.couponPrice*NEW.noPlayed)
+  WHERE user_ID=NEW.user_ID AND couponID=NEW.couponID;
 
 
 END;//
