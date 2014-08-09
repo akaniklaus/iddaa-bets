@@ -271,7 +271,7 @@ BEGIN
   SELECT SUM(a.won)/COUNT(a.won)+1, AVG(a.won*a.ratio), SUM(b.won)/COUNT(b.won)+1, AVG(b.won*b.ratio),
   SUM(a.won*a.noPlayed*a.couponPrice)/SUM(a.noPlayed*a.couponPrice)+1,
   AVG(a.won*a.noPlayed*a.couponPrice*a.ratio)/SUM(a.noPlayed*a.couponPrice)+1,
-  AVG(a.isReleased * a.couponPrice * a.noPlayed)
+  AVG(a.isReleased * a.couponPrice * a.noPlayed)+1
   INTO wr, wm, mr, mm, wrc, ucr, usr
   FROM tbl_UserCoupon a, tbl_Coupons b
   WHERE user_ID=NEW.user_ID AND a.CouponID=b.CouponID;
@@ -282,7 +282,7 @@ BEGIN
   WHERE user_ID=NEW.user_ID;
 
   UPDATE tbl_UserCoupon
-  SET couponCRating=(ucr/NEW.couponPrice), couponSRating=(usr*NEW.couponPrice*NEW.noPlayed)
+  SET couponCRating=(NEW.ratio*ucr)/NEW.couponPrice, couponSRating=usr*NEW.couponPrice*(NEW.noPlayed+1)
   WHERE user_ID=NEW.user_ID AND couponID=NEW.couponID;
 
 
