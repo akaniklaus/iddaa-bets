@@ -195,10 +195,6 @@ CREATE TABLE tbl_UserCoupon(
 	PRIMARY KEY (`couponID`, `user_ID`)
 );
 
-DROP TABLE IF EXISTS tbl_UserStats;
-CREATE TABLE tbl_UserStats(
-    `user_ID` int(11) NOT NULL,
-
 DROP TABLE IF EXISTS tbl_Users;
 CREATE TABLE `tbl_Users` (
   `user_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -212,7 +208,7 @@ CREATE TABLE `tbl_Users` (
   `userCRating` double DEFAULT 1,
   `userSRating` double DEFAULT 1,
   PRIMARY KEY (`user_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS tbl_Coupons;
 CREATE TABLE tbl_Coupons(
