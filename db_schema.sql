@@ -184,13 +184,22 @@ CREATE TABLE tbl_Results(
 
 
 CREATE TABLE tbl_UserCoupon(
-    `userID` int(11) NOT NULL,
+    `user_ID` int(11) NOT NULL,
     `couponID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `start_date` datetime DEFAULT NULL,
     `end_date` datetime DEFAULT NULL,
 	`won` boolean DEFAULT NULL,
 	`ratio` double DEFAULT NULL,
-	PRIMARY KEY (`couponID`, `userID`)
+	PRIMARY KEY (`couponID`, `user_ID`)
+);
+
+CREATE TABLE tbl_UserStats(
+    `user_ID` int(11) NOT NULL,
+  `winRatio` double DEFAULT 0.5,
+  `matchRatio` double DEFAULT 0.5,
+  `winMulti` double DEFAULT 1,
+  `matchMulti` double DEFAULT 1,
+  PRIMARY KEY (`user_ID`)
 );
 
 
@@ -204,8 +213,8 @@ CREATE TABLE tbl_Coupons(
 );
 
 delimiter //
-CREATE TRIGGER updateUserCoupon BEFORE INSERT ON tbl_Coupons 
-    FOR EACH ROW 
+CREATE TRIGGER updateUserCoupon BEFORE INSERT ON tbl_Coupons
+    FOR EACH ROW
 BEGIN
 -- update start date and end date
     DECLARE sd datetime;
@@ -221,3 +230,23 @@ BEGIN
 END;//
 delimiter ;
 
+delimiter //
+CREATE TRIGGER updateStatistics AFTER UPDATE ON tbl_UserCoupon
+    FOR EACH ROW
+BEGIN
+-- update start date and end date
+  DECLARE wr double;
+  DECLARE wm double;
+  DECLARE mr double;
+  DECLARE mm double;
+
+  SELECT SUM(a.won)/COUNT(a.won), SUM(a.won*a.ratio), SUM(b.won)/COUNT(b.won), SUM(b.won*b.ratio)
+  INTO wr, wm, mr, mm
+  FROM tbl_UserCoupon a, tbl_Coupons b
+  WHERE userID=NEW.userID AND a.CouponID=b.CouponID;
+
+  UPDATE tbl_UserStats
+  SET winRatio=wr, matchRatio=wm, winMulti=mr, matchMulti=mm
+  WHERE couponID=NEW.couponID;
+END;//
+delimiter ;
