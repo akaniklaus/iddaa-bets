@@ -52,18 +52,21 @@ def update_user_coupon_ratios():
 
 today_id = get_today_id()
 
-j = get_json_data(URL_MATCHES % today_id)
-matches_last = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
-
 x = DB_CONN.cursor()
-query = """SELECT * FROM tbl_MatchInfo WHERE weekID=%d AND was_played=False""" % (today_id -1)
+query = """SELECT matchID FROM tbl_MatchInfo WHERE weekID=%d AND was_played=False""" % (today_id -1)
 results = x.execute(query)
-
 matches_previous = {}
 
 if results:
   j = get_json_data(URL_MATCHES % (today_id - 1))
   matches_previous = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
+
+query = """SELECT matchID FROM tbl_MatchInfo WHERE weekID=%d AND was_played=True""" % today_id
+x.execute(query)
+results = x.fetchall()
+
+j = get_json_data(URL_MATCHES % today_id)
+matches_last = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
 all_matches = concat(matches_previous.values() + matches_last.values())
 
@@ -73,7 +76,8 @@ for md in concat(matches_previous.values()):
 
 for md in concat(matches_last.values()):
     match = Match(md, weekid=today_id)
-    match.save_all()
+    if not match.matchID in results:
+      match.save_all()
 
 update_user_coupon_ratios()
 
