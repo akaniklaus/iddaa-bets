@@ -243,10 +243,10 @@ BEGIN
   SELECT SUM(a.won)/COUNT(a.won), SUM(a.won*a.ratio), SUM(b.won)/COUNT(b.won), SUM(b.won*b.ratio)
   INTO wr, wm, mr, mm
   FROM tbl_UserCoupon a, tbl_Coupons b
-  WHERE userID=NEW.userID AND a.CouponID=b.CouponID;
+  WHERE user_ID=NEW.user_ID AND a.CouponID=b.CouponID;
 
   UPDATE tbl_UserStats
   SET winRatio=wr, matchRatio=wm, winMulti=mr, matchMulti=mm
-  WHERE couponID=NEW.couponID;
+  WHERE user_ID=NEW.user_ID;
 END;//
 delimiter ;
