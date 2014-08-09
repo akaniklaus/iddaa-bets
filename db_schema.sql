@@ -191,6 +191,7 @@ CREATE TABLE tbl_UserCoupon(
   `couponPrice` double NOT NULL,
   `noCustomers` int(11) NOT NULL,
   `noPlayed` int(11) DEFAULT 0,
+  `isCreated` boolean NOT NULL DEFAULT 0,
   `isReleased` boolean DEFAULT NULL,
   `couponCRating` double DEFAULT 0,
   `couponSRating` double DEFAULT 0,
