@@ -56,7 +56,7 @@ j = get_json_data(URL_MATCHES % today_id)
 matches_last = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
 
 x = DB_CONN.cursor()
-query = """SELECT * FROM tbl_MatchInfo WHERE weekID=(today_id -1) AND was_played=False"""
+query = """SELECT * FROM tbl_MatchInfo WHERE weekID=%d AND was_played=False""" % (today_id -1)
 results = x.execute(query)
 
 matches_previous = {}
