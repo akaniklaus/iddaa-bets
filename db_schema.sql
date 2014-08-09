@@ -204,11 +204,11 @@ CREATE TABLE `tbl_Users` (
   `user_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `facebookID` varchar(64) DEFAULT NULL,
   `userName` varchar(64) DEFAULT NULL,
-  `winRatio` double DEFAULT 0.5,
-  `matchRatio` double DEFAULT 0.5,
+  `winRatio` double DEFAULT NULL,
+  `matchRatio` double DEFAULT NULL,
   `winMulti` double DEFAULT 1,
   `matchMulti` double DEFAULT 1,
-  `moneyWonRatio` double DEFAULT 0.5,
+  `moneyWonRatio` double DEFAULT NULL,
   `userCRating` double DEFAULT 1,
   `userSRating` double DEFAULT 1,
   PRIMARY KEY (`user_ID`)
@@ -270,8 +270,8 @@ BEGIN
   DECLARE ucr double;
   DECLARE usr double;
 
-  SELECT SUM(a.won)/(COUNT(a.won)+1), AVG(a.won*a.ratio), SUM(b.won)/(COUNT(b.won)+1), AVG(b.won*b.ratio),
-  SUM(a.won*a.noPlayed*a.couponPrice)/(SUM(a.noPlayed*a.couponPrice)+1),
+  SELECT SUM(a.won)/COUNT(a.won), AVG(a.won*a.ratio), SUM(b.won)/COUNT(b.won), AVG(b.won*b.ratio),
+  SUM(a.won*a.noPlayed*a.couponPrice)/SUM(a.noPlayed*a.couponPrice),
   AVG(a.won*a.noPlayed*a.couponPrice*a.ratio)/(SUM(a.noPlayed*a.couponPrice)+1),
   AVG(a.isReleased * a.couponPrice * a.noPlayed)+1
   INTO wr, wm, mr, mm, wrc, ucr, usr
