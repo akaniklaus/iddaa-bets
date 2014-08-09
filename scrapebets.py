@@ -63,7 +63,7 @@ if results:
 
 query = """SELECT matchID FROM tbl_MatchInfo WHERE weekID=%d AND was_played=True""" % today_id
 x.execute(query)
-results = x.fetchall()
+results = [row[0] for row in x.fetchall()]
 
 j = get_json_data(URL_MATCHES % today_id)
 matches_last = {j['m'][i]['d']: j['m'][i]['m'] for i in range(len(j['m']))}
