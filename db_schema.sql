@@ -221,6 +221,7 @@ CREATE TABLE tbl_Coupons(
     `matchID` int(11) NOT NULL,
     `bet_index` int(11) NOT NULL,
 	`won` boolean DEFAULT NULL,
+  `ratio` double DEFAULT NULL,
 	PRIMARY KEY (`couponID`, `weekID`,`matchID`)
 );
 
@@ -283,11 +284,11 @@ BEGIN
   moneyWonRatio=wrc, userCRating=ucr, userSRating=usr
   WHERE user_ID=NEW.user_ID;
 
-  UPDATE tbl_UserCoupon
-  SET couponCRating=(ucr*NEW.ratio)/NEW.couponPrice,
-  couponSRating=usr*NEW.couponPrice*(NEW.noPlayed+1),
-  couponRating=ucr*usr*NEW.ratio*(NEW.noPlayed+1)
-  WHERE user_ID=NEW.user_ID AND couponID=NEW.couponID;
+  #UPDATE tbl_UserCoupon
+  #SET couponCRating=(ucr*NEW.ratio)/NEW.couponPrice,
+  #couponSRating=usr*NEW.couponPrice*(NEW.noPlayed+1),
+  #couponRating=ucr*usr*NEW.ratio*(NEW.noPlayed+1)
+  #WHERE user_ID=NEW.user_ID AND couponID=NEW.couponID;
 
 
 END;//

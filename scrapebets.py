@@ -42,7 +42,12 @@ def update_user_coupon_ratios():
             query = """SELECT r%d FROM tbl_Ratios WHERE weekID=%d AND matchID=%d""" %\
                         (bet_index + 1, weekID, matchID)
             x.execute(query)
-            ratio *= x.fetchone()[0]
+            match_ratio = x.fetchone()[0]
+            ratio *= match_ratio
+            query = """UPDATE tbl_Coupons SET ratio=%f WHERE couponID=%d AND weekID=%d AND matchID=%d""" %\
+                    (match_ratio, couponID, weekID, matchID)
+            x.execute(query)
+            DB_CONN.commit()
 
 
         query = """UPDATE tbl_UserCoupon SET ratio=%f WHERE couponID=%d""" %\
