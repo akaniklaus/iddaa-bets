@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # README #
 
 This file explains all steps that are necessary to get our
@@ -60,3 +61,6 @@ then add the following line, save and exit:
 
 * Repo owner or admin
 * Other community or team contact
+=======
+# iddaa-bets
+>>>>>>> 42415ecefbf68924c7b7abf0c63a147e0c0ec4cf
